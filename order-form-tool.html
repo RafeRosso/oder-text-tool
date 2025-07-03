@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>訂購表單轉換工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #4a5568;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .form-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .form-section:hover {
+            background: #edf2f7;
+            transform: translateX(5px);
+        }
+
+        .section-title {
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: '▶';
+            margin-right: 8px;
+            color: #667eea;
+            transition: transform 0.3s;
+        }
+
+        .form-section:hover .section-title::before {
+            transform: rotate(90deg);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        label:hover {
+            color: #667eea;
+        }
+
+        input[type="text"], input[type="tel"], input[type="number"], textarea {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        input[type="text"]:focus, input[type="tel"]:focus, input[type="number"]:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: scale(1.02);
+        }
+
+        input[type="radio"], input[type="checkbox"] {
+            margin-right: 8px;
+            cursor: pointer;
+            transform: scale(1.2);
+        }
+
+        .product-options {
+            display: none;
+            margin-left: 25px;
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .flavor-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #f7fafc;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .flavor-item:hover {
+            background: #e6fffa;
+            transform: translateX(5px);
+        }
+
+        .flavor-item label {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .quantity-input {
+            width: 80px;
+            margin-left: 10px;
+        }
+
+        .unit {
+            margin-left: 5px;
+            color: #718096;
+        }
+
+        .generate-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            display: block;
+            margin: 30px auto;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+
+        .output-section {
+            margin-top: 30px;
+            padding: 25px;
+            background: #f0f4f8;
+            border-radius: 10px;
+            display: none;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .output-text {
+            white-space: pre-wrap;
+            font-family: monospace;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .copy-btn {
+            background: #48bb78;
+            color: white;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            margin: 0 auto;
+        }
+
+        .copy-btn:hover {
+            background: #38a169;
+            transform: scale(1.05);
+        }
+
+        .copy-btn.copied {
+            background: #4299e1;
+        }
+
+        .error {
+            color: #e53e3e;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .delivery-option {
+            margin-bottom: 10px;
+        }
+
+        .address-inputs {
+            display: none;
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .quantity-input {
+                width: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛒 訂購表單快速轉換工具</h1>
+        
+        <form id="orderForm">
+            <div class="form-section">
+                <div class="section-title">基本資料</div>
+                <div class="form-group">
+                    <input type="text" id="customerName" placeholder="訂購人姓名" required>
+                </div>
+                
+                <div class="form-group">
+                    <div class="delivery-option">
+                        <label>
+                            <input type="radio" name="delivery" value="delivery" onchange="toggleDeliveryOption()">
+                            收貨地址
+                        </label>
+                        <div id="addressInputs" class="address-inputs">
+                            <input type="text" id="address" placeholder="請輸入收貨地址" style="margin-bottom: 10px;">
+                            <input type="tel" id="phone" placeholder="請輸入電話號碼">
+                        </div>
+                    </div>
+                    <div class="delivery-option">
+                        <label>
+                            <input type="radio" name="delivery" value="pickup" onchange="toggleDeliveryOption()">
+                            自取
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="section-title">品項選擇</div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="seaweedCheck" onchange="toggleProduct('seaweed')">
+                        烤海苔
+                    </label>
+                    <div id="seaweedOptions" class="product-options">
+                        <div class="flavor-item">
+                            <label>
+                                <input type="checkbox" name="seaweedFlavor" value="原味">
+                                原味
+                            </label>
+                            <input type="number" class="quantity-input" placeholder="數量" min="0">
+                            <span class="unit">包</span>
+                        </div>
+                        <div class="flavor-item">
+                            <label>
+                                <input type="checkbox" name="seaweedFlavor" value="辣味">
+                                辣味
+                            </label>
+                            <input type="number" class="quantity-input" placeholder="數量" min="0">
+                            <span class="unit">包</span>
+                        </div>
+                        <div class="flavor-item">
+                            <label>
+                                <input type="checkbox" name="seaweedFlavor" value="梅子">
+                                梅子
+                            </label>
+                            <input type="number" class="quantity-input" placeholder="數量" min="0">
+                            <span class="unit">包</span>
+                        </div>
+                        <div class="flavor-item">
+                            <label>
+                                <input type="checkbox" name="seaweedFlavor" value="椒鹽">
+                                椒鹽
+                            </label>
+                            <input type="number" class="quantity-input" placeholder="數量" min="0">
+                            <span class="unit">包</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="jerkyCheck" onchange="toggleProduct('jerky')">
+                        肉乾
+                    </label>
+                    <div id="jerkyOptions" class="product-options">
+                        <div class="flavor-item">
+                            <label>
+                                <input type="checkbox" name="jerkyFlavor" value="蜜汁">
+                                蜜汁
+                            </label>
+                            <input type="number" class="quantity-input" placeholder="數量" min="0">
+                            <span class="unit">斤</span>
+                        </div>
+                        <div class="flavor-item">
+                            <label>
+                                <input type="checkbox" name="jerkyFlavor" value="蒜味">
+                                蒜味
+                            </label>
+                            <input type="number" class="quantity-input" placeholder="數量" min="0">
+                            <span class="unit">斤</span>
+                        </div>
+                        <div class="flavor-item">
+                            <label>
+                                <input type="checkbox" name="jerkyFlavor" value="泰式">
+                                泰式
+                            </label>
+                            <input type="number" class="quantity-input" placeholder="數量" min="0">
+                            <span class="unit">斤</span>
+                        </div>
+                        <div class="flavor-item">
+                            <label>
+                                <input type="checkbox" name="jerkyFlavor" value="川辣">
+                                川辣
+                            </label>
+                            <input type="number" class="quantity-input" placeholder="數量" min="0">
+                            <span class="unit">斤</span>
+                        </div>
+                        <div class="flavor-item">
+                            <label>
+                                <input type="checkbox" name="jerkyFlavor" value="起司">
+                                起司
+                            </label>
+                            <input type="number" class="quantity-input" placeholder="數量" min="0">
+                            <span class="unit">斤</span>
+                        </div>
+                        <div class="flavor-item">
+                            <label>
+                                <input type="checkbox" name="jerkyFlavor" value="黑胡椒">
+                                黑胡椒
+                            </label>
+                            <input type="number" class="quantity-input" placeholder="數量" min="0">
+                            <span class="unit">斤</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="section-title">備註</div>
+                <div class="form-group">
+                    <textarea id="notes" rows="3" placeholder="請輸入備註（選填）"></textarea>
+                </div>
+            </div>
+
+            <div class="error" id="errorMessage"></div>
+            
+            <button type="button" class="generate-btn" onclick="generateOrder()">
+                生成訂單文字
+            </button>
+        </form>
+
+        <div id="outputSection" class="output-section">
+            <h3 style="margin-bottom: 15px; color: #2d3748;">訂單文字</h3>
+            <div id="outputText" class="output-text"></div>
+            <button class="copy-btn" onclick="copyToClipboard()">
+                <span id="copyBtnText">📋 複製到剪貼簿</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function toggleDeliveryOption() {
+            const deliveryRadio = document.querySelector('input[name="delivery"]:checked');
+            const addressInputs = document.getElementById('addressInputs');
+            
+            if (deliveryRadio && deliveryRadio.value === 'delivery') {
+                addressInputs.style.display = 'block';
+            } else {
+                addressInputs.style.display = 'none';
+            }
+        }
+
+        function toggleProduct(product) {
+            const checkbox = document.getElementById(product + 'Check');
+            const options = document.getElementById(product + 'Options');
+            
+            if (checkbox.checked) {
+                options.style.display = 'block';
+            } else {
+                options.style.display = 'none';
+                // Clear selections when unchecked
+                const flavorCheckboxes = options.querySelectorAll('input[type="checkbox"]');
+                const quantityInputs = options.querySelectorAll('input[type="number"]');
+                
+                flavorCheckboxes.forEach(cb => cb.checked = false);
+                quantityInputs.forEach(input => input.value = '');
+            }
+        }
+
+        function generateOrder() {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.style.display = 'none';
+            
+            // Get basic info
+            const customerName = document.getElementById('customerName').value.trim();
+            if (!customerName) {
+                showError('請輸入訂購人姓名');
+                return;
+            }
+
+            // Check delivery option
+            const deliveryOption = document.querySelector('input[name="delivery"]:checked');
+            if (!deliveryOption) {
+                showError('請選擇收貨方式');
+                return;
+            }
+
+            if (deliveryOption.value === 'delivery') {
+                const address = document.getElementById('address').value.trim();
+                const phone = document.getElementById('phone').value.trim();
+                if (!address || !phone) {
+                    showError('請填寫完整的收貨地址和電話');
+                    return;
+                }
+            }
+
+            // Check if at least one product is selected
+            const seaweedChecked = document.getElementById('seaweedCheck').checked;
+            const jerkyChecked = document.getElementById('jerkyCheck').checked;
+            
+            if (!seaweedChecked && !jerkyChecked) {
+                showError('請至少選擇一種品項');
+                return;
+            }
+
+            // Collect order data
+            const orderData = {
+                seaweed: [],
+                jerky: []
+            };
+
+            let hasValidOrder = false;
+
+            // Collect seaweed orders
+            if (seaweedChecked) {
+                const seaweedItems = document.querySelectorAll('#seaweedOptions .flavor-item');
+                seaweedItems.forEach(item => {
+                    const checkbox = item.querySelector('input[type="checkbox"]');
+                    const quantity = item.querySelector('input[type="number"]').value;
+                    
+                    if (checkbox.checked && quantity && parseInt(quantity) > 0) {
+                        orderData.seaweed.push({
+                            flavor: checkbox.value,
+                            quantity: parseInt(quantity)
+                        });
+                        hasValidOrder = true;
+                    }
+                });
+            }
+
+            // Collect jerky orders
+            if (jerkyChecked) {
+                const jerkyItems = document.querySelectorAll('#jerkyOptions .flavor-item');
+                jerkyItems.forEach(item => {
+                    const checkbox = item.querySelector('input[type="checkbox"]');
+                    const quantity = item.querySelector('input[type="number"]').value;
+                    
+                    if (checkbox.checked && quantity && parseInt(quantity) > 0) {
+                        orderData.jerky.push({
+                            flavor: checkbox.value,
+                            quantity: parseInt(quantity)
+                        });
+                        hasValidOrder = true;
+                    }
+                });
+            }
+
+            if (!hasValidOrder) {
+                showError('請至少選擇一種口味並填寫數量');
+                return;
+            }
+
+            // Generate output
+            const date = new Date();
+            const dateStr = date.getFullYear() + 
+                          String(date.getMonth() + 1).padStart(2, '0') + 
+                          String(date.getDate()).padStart(2, '0');
+
+            let output = '';
+            
+            // Generate title based on selected products
+            let productType = '';
+            if (orderData.seaweed.length > 0 && orderData.jerky.length > 0) {
+                productType = '烤海苔肉乾';
+            } else if (orderData.seaweed.length > 0) {
+                productType = '烤海苔';
+            } else {
+                productType = '肉乾';
+            }
+            
+            output += `${dateStr} ${customerName}${productType}訂單\n`;
+
+            // Add delivery info
+            if (deliveryOption.value === 'delivery') {
+                const address = document.getElementById('address').value.trim();
+                const phone = document.getElementById('phone').value.trim();
+                output += `收貨地址：${address}\n`;
+                output += `電話：${phone}\n`;
+            } else {
+                output += `自取\n`;
+            }
+
+            // Add seaweed items
+            let totalSeaweed = 0;
+            orderData.seaweed.forEach(item => {
+                output += `${item.flavor} ${item.quantity} 包\n`;
+                totalSeaweed += item.quantity;
+            });
+
+            // Add jerky items
+            let totalJerky = 0;
+            orderData.jerky.forEach(item => {
+                output += `${item.flavor} ${item.quantity} 斤\n`;
+                totalJerky += item.quantity;
+            });
+
+            // Add totals
+            if (totalSeaweed > 0 && totalJerky > 0) {
+                output += `共 ${totalSeaweed} 包、${totalJerky} 斤\n`;
+            } else if (totalSeaweed > 0) {
+                output += `共 ${totalSeaweed} 包\n`;
+            } else {
+                output += `共 ${totalJerky} 斤\n`;
+            }
+
+            // Add notes
+            const notes = document.getElementById('notes').value.trim();
+            if (notes) {
+                output += `備註：${notes}`;
+            } else {
+                output += `備註：`;
+            }
+
+            // Display output
+            document.getElementById('outputText').textContent = output;
+            document.getElementById('outputSection').style.display = 'block';
+            
+            // Scroll to output
+            document.getElementById('outputSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function copyToClipboard() {
+            const outputText = document.getElementById('outputText').textContent;
+            const copyBtn = document.querySelector('.copy-btn');
+            const copyBtnText = document.getElementById('copyBtnText');
+            
+            navigator.clipboard.writeText(outputText).then(() => {
+                copyBtn.classList.add('copied');
+                copyBtnText.textContent = '✓ 已複製！';
+                
+                setTimeout(() => {
+                    copyBtn.classList.remove('copied');
+                    copyBtnText.textContent = '📋 複製到剪貼簿';
+                }, 2000);
+            }).catch(err => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = outputText;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                copyBtn.classList.add('copied');
+                copyBtnText.textContent = '✓ 已複製！';
+                
+                setTimeout(() => {
+                    copyBtn.classList.remove('copied');
+                    copyBtnText.textContent = '📋 複製到剪貼簿';
+                }, 2000);
+            });
+        }
+
+        // Add Enter key support for form submission
+        document.getElementById('orderForm').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.target.type !== 'textarea') {
+                e.preventDefault();
+                generateOrder();
+            }
+        });
+    </script>
+</body>
+</html>
